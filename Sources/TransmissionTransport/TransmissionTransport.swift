@@ -145,8 +145,10 @@ func makeTransmissionConnection(_ connection: Transport.Connection) -> Transmiss
   return TransportToTransmissionConnection(connection)
 }
 #else
-func makeTransmissionConnection(_ connection: Transport.Connection) -> Transmission.Connection
+func makeTransmissionConnection(_ connection: Transport.Connection) -> Transmission.Connection?
 {
-  return Transmission.Connection(connection)
+    guard let newConnection = connection as? NWConnection
+    else { return nil }
+    return Transmission.Connection(connection: newConnection)
 }
 #endif

@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "TransmissionTransport",
     platforms: [
-      .macOS(.v10_15)
+      .macOS(.v11)
     ],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
@@ -17,10 +17,10 @@ let package = Package(
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
-        .package(url: "https://github.com/OperatorFoundation/Chord.git", from: "0.0.10"),
+        .package(url: "https://github.com/OperatorFoundation/Chord.git", from: "0.0.12"),
         .package(url: "https://github.com/OperatorFoundation/Datable.git", from: "3.0.4"),
-        .package(url: "https://github.com/OperatorFoundation/Transport.git", from: "2.3.0"),
-        .package(url: "https://github.com/OperatorFoundation/Transmission.git", from: "0.2.0"),
+        .package(url: "https://github.com/OperatorFoundation/Transport.git", from: "2.3.5"),
+        .package(url: "https://github.com/OperatorFoundation/Transmission.git", from: "0.2.3"),
         .package(url: "https://github.com/OperatorFoundation/TransmissionLinux.git", from: "0.3.1"),
         .package(url: "https://github.com/OperatorFoundation/NetworkLinux.git", from: "0.3.0"),
     ],
