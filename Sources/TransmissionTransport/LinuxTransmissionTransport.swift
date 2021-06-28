@@ -1,17 +1,13 @@
+// This only compiles on Linux
+#if os(Linux)
+
 import Foundation
 import Transport
 import Chord
 import Datable
-
-#if os(Linux)
 import TransmissionLinux
 import NetworkLinux
-#else
-import Transmission
-import Network
-#endif
 
-#if os(Linux)
 public struct TransmissionToTransportConnection: Transport.Connection
 {
   public var stateUpdateHandler: ((NWConnection.State) -> Void)?
@@ -45,43 +41,7 @@ func makeTransportConnection(_ connection: TransmissionLinux.Connection) -> Tran
 {
   return TransmissionToTransportConnection(connection)
 }
-#else
-public struct TransmissionToTransportConnection: Transport.Connection
-{
-  public var stateUpdateHandler: ((NWConnection.State) -> Void)?
-  public var viabilityUpdateHandler: ((Bool) -> Void)?
 
-  let conn: Transmission.Connection
-
-  public init(_ conn: Transmission.Connection)
-  {
-    self.conn = conn
-  }
-
-  public func start(queue: DispatchQueue)
-  {
-  }
-
-  public func cancel()
-  {
-  }
-
-  public func send(content: Data?, contentContext: NWConnection.ContentContext, isComplete: Bool, completion: NWConnection.SendCompletion)
-  {
-  }
-
-  public func receive(minimumIncompleteLength: Int, maximumLength: Int, completion: @escaping (Data?, NWConnection.ContentContext?, Bool, NWError?) -> Void)
-  {
-  }
-}
-
-func makeTransportConnection(_ connection: Transmission.Connection) -> Transport.Connection
-{
-  return TransmissionToTransportConnection(connection)
-}
-#endif
-
-#if os(Linux)
 struct TransportToTransmissionConnection: TransmissionLinux.Connection
 {
   let conn: Transport.Connection
@@ -144,11 +104,5 @@ func makeTransmissionConnection(_ connection: Transport.Connection) -> Transmiss
 {
   return TransportToTransmissionConnection(connection)
 }
-#else
-func makeTransmissionConnection(_ connection: Transport.Connection) -> Transmission.Connection?
-{
-    guard let newConnection = connection as? NWConnection
-    else { return nil }
-    return Transmission.Connection(connection: newConnection)
-}
+
 #endif
