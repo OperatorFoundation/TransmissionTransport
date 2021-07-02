@@ -38,9 +38,11 @@ public struct TransmissionToTransportConnection: Transport.Connection
             switch completion
             {
                 case .idempotent:
+                    print("Dispatch queue could not be found")
                     return
                 case .contentProcessed(let callback):
                     callback(error)
+                    print("Dispatch queue found!")
                     return
                 default:
                     return
@@ -54,9 +56,11 @@ public struct TransmissionToTransportConnection: Transport.Connection
                 switch completion
                 {
                     case .idempotent:
+                        print("No data to send. Exiting.")
                         return
                     case .contentProcessed(let callback):
                         callback(error)
+                        print("Data available to send!")
                         return
                     default:
                         return
@@ -68,9 +72,11 @@ public struct TransmissionToTransportConnection: Transport.Connection
                 switch completion
                 {
                     case .idempotent:
+                        print("Could not write data")
                         return
                     case .contentProcessed(let callback):
                         callback(error)
+                        print("Data successfully written!")
                         return
                     default:
                         return
@@ -80,9 +86,11 @@ public struct TransmissionToTransportConnection: Transport.Connection
             switch completion
             {
                 case .idempotent:
+                    print("Transmission to Transport callback failed.")
                     return
                 case .contentProcessed(let callback):
                     callback(nil)
+                    print("Transmission to Transport callback finished!")
                     return
                 default:
                     return
