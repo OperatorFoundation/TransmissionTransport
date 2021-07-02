@@ -32,6 +32,7 @@ public struct TransmissionToTransportConnection: Transport.Connection
 
     public func send(content: Data?, contentContext: NWConnection.ContentContext, isComplete: Bool, completion: NWConnection.SendCompletion)
     {
+        print("Transmission to Transport send called.")
         let error = NWError.posix(POSIXErrorCode.ECONNABORTED)
 
         guard let queue = self.dispatch else {
