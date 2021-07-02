@@ -19,6 +19,7 @@ public struct TransmissionToTransportConnection: Transport.Connection
     public init(_ conn: TransmissionLinux.Connection)
     {
         self.conn = conn
+        print("Transmission to Transport initialized.")
     }
 
     public func start(queue: DispatchQueue)
