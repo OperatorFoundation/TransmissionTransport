@@ -8,7 +8,7 @@ import Datable
 import TransmissionLinux
 import NetworkLinux
 
-public struct TransmissionToTransportConnection: Transport.Connection
+public class TransmissionToTransportConnection: Transport.Connection
 {
     public var stateUpdateHandler: ((NWConnection.State) -> Void)?
     public var viabilityUpdateHandler: ((Bool) -> Void)?
