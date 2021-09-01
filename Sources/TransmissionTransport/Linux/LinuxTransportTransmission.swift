@@ -64,6 +64,10 @@ struct TransportToTransmissionConnection: TransmissionLinux.Connection
             return
         }))
     }
+    
+    public func identifier() -> Int {
+            return Int(self.socket.socketfd)
+    }
 }
 
 func makeTransmissionConnection(_ connection: Transport.Connection) -> TransmissionLinux.Connection
