@@ -44,7 +44,7 @@ public class TransmissionToTransportConnection: Transport.Connection
                     return
                 case .contentProcessed(let callback):
                     callback(error)
-                    print("Dispatch queue found!")
+                    print("Dispatch queue could not be found")
                     return
                 default:
                     return
@@ -62,7 +62,7 @@ public class TransmissionToTransportConnection: Transport.Connection
                         return
                     case .contentProcessed(let callback):
                         callback(error)
-                        print("Data available to send!")
+                        print("No data to send. Exiting.")
                         return
                     default:
                         return
@@ -78,7 +78,7 @@ public class TransmissionToTransportConnection: Transport.Connection
                         return
                     case .contentProcessed(let callback):
                         callback(error)
-                        print("Data successfully written!")
+                        print("Could not write data")
                         return
                     default:
                         return
