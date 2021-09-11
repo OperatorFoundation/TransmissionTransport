@@ -51,6 +51,7 @@ struct TransportToTransmissionConnection: TransmissionLinux.Connection
 
     public func asyncWrite(data: Data, callback: @escaping (Bool) -> Void)
     {
+        //FIXME: remove this print when the debugging is done
         print("asyncWrite data write called: \(data.string)")
         self.conn.send(content: data, contentContext: NWConnection.ContentContext.defaultMessage, isComplete: false, completion: NWConnection.SendCompletion.contentProcessed({
             maybeError in
