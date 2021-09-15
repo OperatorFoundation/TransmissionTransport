@@ -18,10 +18,10 @@ let package = Package(
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
         .package(url: "https://github.com/OperatorFoundation/Chord.git", from: "0.0.12"),
-        .package(url: "https://github.com/OperatorFoundation/Datable.git", from: "3.0.4"),
-        .package(url: "https://github.com/OperatorFoundation/Transport.git", from: "2.3.5"),
-        .package(url: "https://github.com/OperatorFoundation/Transmission.git", from: "0.2.3"),
-        .package(url: "https://github.com/OperatorFoundation/TransmissionLinux.git", from: "0.3.1"),
+        .package(url: "https://github.com/OperatorFoundation/Datable.git", from: "3.0.6"),
+        .package(url: "https://github.com/OperatorFoundation/Transport.git", from: "2.3.6"),
+        .package(url: "https://github.com/OperatorFoundation/Transmission.git", from: "0.2.4"),
+        .package(url: "https://github.com/OperatorFoundation/TransmissionLinux.git", from: "0.3.4"),
         .package(url: "https://github.com/OperatorFoundation/NetworkLinux.git", from: "0.4.1"),
     ],
     targets: [
