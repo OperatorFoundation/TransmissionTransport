@@ -102,6 +102,7 @@ public class TransmissionToTransportConnection: Transport.Connection
 
     public func receive(minimumIncompleteLength: Int, maximumLength: Int, completion: @escaping (Data?, NWConnection.ContentContext?, Bool, NWError?) -> Void)
     {
+        print("TransmissionTransport receive called")
         let error = NWError.posix(POSIXErrorCode.ECONNABORTED)
         guard let queue = self.dispatch else {return}
 

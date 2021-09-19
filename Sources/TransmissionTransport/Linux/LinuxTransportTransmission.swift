@@ -19,11 +19,13 @@ struct TransportToTransmissionConnection: TransmissionLinux.Connection
 
     public func read(size: Int) -> Data?
     {
+        print("TransmissionTransport read called")
         return Synchronizer.sync({callback in return asyncRead(size: size, callback: callback)})
     }
 
     func asyncRead(size: Int, callback: @escaping (Data?) -> Void)
     {
+        print("TransmissionTransport asyncRead called")
         self.conn.receive(minimumIncompleteLength: size, maximumLength: size)
         {
             (data: Data?, context: NWConnection.ContentContext?, isComplete: Bool, maybeError: NWError?) in
@@ -41,18 +43,20 @@ struct TransportToTransmissionConnection: TransmissionLinux.Connection
 
     public func write(string: String) -> Bool
     {
+        print("TransmissionTransport string write called")
         return write(data: string.data)
     }
 
     public func write(data: Data) -> Bool
     {
+        print("TransmissionTransport data write called")
         return Synchronizer.sync({callback in return asyncWrite(data: data, callback: callback)})
     }
 
     public func asyncWrite(data: Data, callback: @escaping (Bool) -> Void)
     {
         //FIXME: remove this print when the debugging is done
-        print("asyncWrite data write called: \(data.string)")
+        print("TransmissionTransport asyncWrite data write called: \(data.string)")
         self.conn.send(content: data, contentContext: NWConnection.ContentContext.defaultMessage, isComplete: false, completion: NWConnection.SendCompletion.contentProcessed({
             maybeError in
 
