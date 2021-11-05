@@ -12,6 +12,6 @@ func makeTransmissionConnection(_ connection: Transport.Connection) -> Transmiss
 {
     guard let newConnection = connection as? NWConnection
     else { return nil }
-    return Transmission.Connection(connection: newConnection)
+    return TransmissionConnection(transport: newConnection, logger: nil)
 }
 #endif
