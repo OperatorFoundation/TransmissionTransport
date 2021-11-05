@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "TransmissionTransport",
     platforms: [
-      .macOS(.v11)
+        .macOS(.v10_15)
     ],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
@@ -20,8 +20,7 @@ let package = Package(
         .package(url: "https://github.com/OperatorFoundation/Chord.git", from: "0.0.12"),
         .package(url: "https://github.com/OperatorFoundation/Datable.git", from: "3.0.6"),
         .package(url: "https://github.com/OperatorFoundation/Transport.git", from: "2.3.6"),
-        .package(url: "https://github.com/OperatorFoundation/Transmission.git", from: "0.2.4"),
-        .package(url: "https://github.com/OperatorFoundation/TransmissionLinux.git", from: "0.3.4"),
+        .package(url: "https://github.com/OperatorFoundation/Transmission.git", from: "0.6.0"),
         .package(url: "https://github.com/OperatorFoundation/NetworkLinux.git", from: "0.4.1"),
     ],
     targets: [
@@ -34,9 +33,7 @@ let package = Package(
 			"Chord",
 			"Datable",
 			"Transport",
-			.product(name: "NetworkLinux", package: "NetworkLinux", condition: .when(platforms: [.linux])),
 			.product(name: "Transmission", package: "Transmission", condition: .when(platforms: [.macOS])),
-			.product(name: "TransmissionLinux", package: "TransmissionLinux", condition: .when(platforms: [.linux])),
 		]
 	),
         .testTarget(
