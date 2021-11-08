@@ -1,6 +1,3 @@
-// This only compiles on macOS
-#if os(macOS)
-
 import Foundation
 import Transport
 import Chord
@@ -119,4 +116,3 @@ func makeTransportConnection(_ connection: Transmission.Connection) -> Transport
 {
     return TransmissionToTransportConnection(connection)
 }
-#endif

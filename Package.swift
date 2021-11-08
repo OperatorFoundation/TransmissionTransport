@@ -34,7 +34,7 @@ let package = Package(
 			"Datable",
 			"Transport",
             "Net",
-			.product(name: "Transmission", package: "Transmission", condition: .when(platforms: [.macOS])),
+			.product(name: "Transmission", package: "Transmission"),
 		]
 	),
         .testTarget(
