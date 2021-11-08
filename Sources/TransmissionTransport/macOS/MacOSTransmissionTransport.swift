@@ -6,7 +6,7 @@ import Transport
 import Chord
 import Datable
 import Transmission
-import Network
+import Net
 
 public class TransmissionToTransportConnection: Transport.Connection
 {

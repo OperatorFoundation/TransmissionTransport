@@ -5,8 +5,8 @@ import Foundation
 import Transport
 import Chord
 import Datable
-import TransmissionLinux
-import NetworkLinux
+import Transmission
+import Net
 
 public class TransmissionToTransportConnection: Transport.Connection
 {

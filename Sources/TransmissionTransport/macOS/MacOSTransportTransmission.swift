@@ -6,7 +6,7 @@ import Transport
 import Chord
 import Datable
 import Transmission
-import Network
+import Net
 
 func makeTransmissionConnection(_ connection: Transport.Connection) -> Transmission.Connection?
 {
