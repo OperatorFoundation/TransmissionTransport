@@ -10,17 +10,34 @@ public class TransmissionToTransportConnection: Transport.Connection
     public var stateUpdateHandler: ((NWConnection.State) -> Void)?
     public var viabilityUpdateHandler: ((Bool) -> Void)?
 
-    let conn: Transmission.Connection
+    let connectionFactory: () -> Transmission.Connection?
+    var conn: Transmission.Connection?
     var dispatch: DispatchQueue?
 
-    public init(_ conn: Transmission.Connection)
+    public init(_ connectionFactory: @escaping () -> Transmission.Connection?)
     {
-        self.conn = conn
+        self.connectionFactory = connectionFactory
     }
 
     public func start(queue: DispatchQueue)
     {
         self.dispatch = queue
+        if let conn = connectionFactory()
+        {
+            self.conn = conn
+
+            if let handler = self.stateUpdateHandler
+            {
+                handler(.ready)
+            }
+        }
+        else
+        {
+            if let handler = self.stateUpdateHandler
+            {
+                handler(.failed(NWError.posix(POSIXErrorCode.ECONNREFUSED)))
+            }
+        }
     }
 
     public func cancel()
@@ -60,7 +77,21 @@ public class TransmissionToTransportConnection: Transport.Connection
                 }
             }
 
-            guard self.conn.write(data: data) else
+            guard let conn = self.conn else
+            {
+                switch completion
+                {
+                    case .idempotent:
+                        return
+                    case .contentProcessed(let callback):
+                        callback(NWError.posix(.ECONNREFUSED))
+                        return
+                    default:
+                        return
+                }
+            }
+
+            guard conn.write(data: data) else
             {
                 switch completion
                 {
@@ -101,7 +132,13 @@ public class TransmissionToTransportConnection: Transport.Connection
                 return
             }
 
-            guard let data = self.conn.read(size: length) else
+            guard let conn = self.conn else
+            {
+                completion(nil, .defaultMessage, true, NWError.posix(.ECONNREFUSED))
+                return
+            }
+
+            guard let data = conn.read(size: length) else
             {
                 completion(nil, .defaultMessage, true, error)
                 return
@@ -112,7 +149,7 @@ public class TransmissionToTransportConnection: Transport.Connection
     }
 }
 
-func makeTransportConnection(_ connection: Transmission.Connection) -> Transport.Connection
+func makeTransportConnection(_ connectionFactory: @escaping () -> Transmission.Connection?) -> Transport.Connection
 {
-    return TransmissionToTransportConnection(connection)
+    return TransmissionToTransportConnection(connectionFactory)
 }
