@@ -20,7 +20,7 @@ let package = Package(
         .package(url: "https://github.com/OperatorFoundation/Chord.git", from: "0.0.15"),
         .package(url: "https://github.com/OperatorFoundation/Datable.git", from: "3.1.1"),
         .package(url: "https://github.com/OperatorFoundation/Transport.git", from: "2.3.9"),
-        .package(url: "https://github.com/OperatorFoundation/Transmission.git", from: "1.0.4"),
+        .package(url: "https://github.com/OperatorFoundation/Transmission.git", from: "1.2.0"),
         .package(url: "https://github.com/OperatorFoundation/Net.git", from: "0.0.1")
     ],
     targets: [
