@@ -5,7 +5,7 @@ import Datable
 import Transmission
 import Net
 
-func makeTransmissionConnection(_ connection: Transport.Connection) -> Transmission.Connection?
+public func makeTransmissionConnection(_ connection: Transport.Connection) -> Transmission.Connection?
 {
     guard let newConnection = connection as? NWConnection
     else { return nil }
