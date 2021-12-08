@@ -21,7 +21,9 @@ let package = Package(
         .package(url: "https://github.com/OperatorFoundation/Datable.git", branch: "main"),
         .package(url: "https://github.com/OperatorFoundation/Transport.git", from: "2.3.11"),
         .package(url: "https://github.com/OperatorFoundation/Transmission.git", branch: "main"),
-        .package(url: "https://github.com/OperatorFoundation/Net.git", branch: "main")
+        .package(url: "https://github.com/OperatorFoundation/SwiftHexTools.git", branch: "main"),
+        .package(url: "https://github.com/OperatorFoundation/Net.git", branch: "main"),
+        .package(url: "https://github.com/apple/swift-log.git", from: "1.4.2"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -34,7 +36,9 @@ let package = Package(
 			"Datable",
 			"Transport",
             "Net",
-			.product(name: "Transmission", package: "Transmission"),
+			"Transmission",
+            "SwiftHexTools",
+            .product(name: "Logging", package: "swift-log"),
 		]
 	),
         .testTarget(
