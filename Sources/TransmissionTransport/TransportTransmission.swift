@@ -298,6 +298,11 @@ public class TransportToTransmissionConnection: Transmission.Connection
         return success
     }
 
+    public func close()
+    {
+        self.connection.cancel()
+    }
+
     func handleState(state: NWConnection.State)
     {
         connectLock.wait()

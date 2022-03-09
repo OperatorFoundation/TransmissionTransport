@@ -42,6 +42,10 @@ public class TransmissionToTransportConnection: Transport.Connection
 
     public func cancel()
     {
+        if let conn = self.conn
+        {
+            conn.close()
+        }
     }
 
     public func send(content: Data?, contentContext: NWConnection.ContentContext, isComplete: Bool, completion: NWConnection.SendCompletion)
