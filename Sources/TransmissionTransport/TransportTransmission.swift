@@ -42,12 +42,12 @@ public class TransportToTransmissionConnection: Transmission.Connection
 
     public func read(size: Int) -> Data?
     {
-        maybeLog(message: "TransmissionLinux read called: \(#file), \(#line)", logger: self.log)
+        maybeLog(message: "TransportTransmission read called(size: \(size): \(#file), \(#line)", logger: self.log)
         readLock.enter()
 
         if size == 0
         {
-            if let log = self.log {log.error("transmission read size was zero")}
+            if let log = self.log {log.error("TransportTransmission read size was zero")}
             readLock.leave()
             return nil
         }
@@ -58,7 +58,7 @@ public class TransportToTransmissionConnection: Transmission.Connection
             buffer = Data(buffer[size..<buffer.count])
 
             readLock.leave()
-            print("\nTransmission read returned result: \(result.hex), buffer: \(buffer.hex)\n")
+            print("\nTransportTransmission read returned result: \(result.hex), buffer: \(buffer.hex)\n")
             return result
         }
 
@@ -73,7 +73,7 @@ public class TransportToTransmissionConnection: Transmission.Connection
 
         guard size <= buffer.count else
         {
-            if let log = self.log {log.error("transmission read asked for more bytes than available in the buffer")}
+            if let log = self.log {log.error("TransportTransmission read asked for more bytes than available in the buffer")}
             readLock.leave()
             return nil
         }
@@ -82,13 +82,13 @@ public class TransportToTransmissionConnection: Transmission.Connection
         buffer = Data(buffer[size..<buffer.count])
 
         readLock.leave()
-        print("\nTransmission read returned result: \(result.hex), buffer: \(buffer.hex)\n")
+        print("\nTransportTransmission read returned result: \(result.hex), buffer: \(buffer.hex)\n")
         return result
     }
 
     public func read(maxSize: Int) -> Data?
     {
-        print("TransmissionLinux read called: \(#file), \(#line)")
+        print("TransportTransmission read called: \(#file), \(#line)")
         readLock.enter()
 
         if maxSize == 0
@@ -237,7 +237,7 @@ public class TransportToTransmissionConnection: Transmission.Connection
 
     public func write(string: String) -> Bool
     {
-        print("TransmissionLinux write called: \(#file), \(#line)")
+        print("TransportTransmission write called: \(#file), \(#line)")
 
         writeLock.enter()
 
@@ -249,7 +249,7 @@ public class TransportToTransmissionConnection: Transmission.Connection
 
     public func write(data: Data) -> Bool
     {
-        print("TransmissionLinux write called: \(#file), \(#line)")
+        print("TransportTransmission write called: \(#file), \(#line)")
 
         writeLock.enter()
 
