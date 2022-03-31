@@ -20,7 +20,9 @@ public class TransportToTransmissionConnection: Transmission.Connection
 
     public convenience init?(logger: Logger? = nil, _ connectionFactory: @escaping () -> Transport.Connection?)
     {
-        guard let connection = connectionFactory() else {return nil}
+        guard let connection = connectionFactory() else
+        {return nil}
+        
         self.init(connection, logger: logger)
     }
 
@@ -28,27 +30,24 @@ public class TransportToTransmissionConnection: Transmission.Connection
     {
         self.connection = connection
         self.log = logger
-
-        maybeLog(message: "Initializing Transmission connection", logger: self.log)
-
         self.id = Int.random(in: 0..<Int.max)
-
         self.connection.stateUpdateHandler = self.handleState
         self.connection.start(queue: .global())
-
         let success = self.states.dequeue()
-        guard success else {return nil}
+        
+        guard success else
+        {return nil}
     }
 
     public func read(size: Int) -> Data?
     {
-        maybeLog(message: "TransportTransmission read called(size: \(size): \(#file), \(#line)", logger: self.log)
         readLock.enter()
 
         if size == 0
         {
-            if let log = self.log {log.error("TransportTransmission read size was zero")}
+            log?.error("TransportTransmission read size was zero")
             readLock.leave()
+            
             return nil
         }
 
@@ -56,15 +55,14 @@ public class TransportToTransmissionConnection: Transmission.Connection
         {
             let result = Data(buffer[0..<size])
             buffer = Data(buffer[size..<buffer.count])
-
             readLock.leave()
-            print("\nTransportTransmission read returned result: \(result.hex), buffer: \(buffer.hex)\n")
+            
             return result
         }
 
         guard let data = networkRead(size: size) else
         {
-            if let log = self.log {log.error("transmission read's network read failed")}
+            log?.error("transmission read's network read failed")
             readLock.leave()
             return nil
         }
@@ -73,22 +71,20 @@ public class TransportToTransmissionConnection: Transmission.Connection
 
         guard size <= buffer.count else
         {
-            if let log = self.log {log.error("TransportTransmission read asked for more bytes than available in the buffer")}
+            log?.error("TransportTransmission read asked for more bytes than available in the buffer")
             readLock.leave()
             return nil
         }
 
         let result = Data(buffer[0..<size])
         buffer = Data(buffer[size..<buffer.count])
-
         readLock.leave()
-        print("\nTransportTransmission read returned result: \(result.hex), buffer: \(buffer.hex)\n")
+        
         return result
     }
 
     public func read(maxSize: Int) -> Data?
     {
-        print("TransportTransmission read called: \(#file), \(#line)")
         readLock.enter()
 
         if maxSize == 0
@@ -111,9 +107,9 @@ public class TransportToTransmissionConnection: Transmission.Connection
         {
             // Buffer is empty, so we need to do a network read
             var data: Data?
-
             let transportLock = DispatchGroup()
             transportLock.enter()
+            
             self.connection.receive(minimumIncompleteLength: 1, maximumLength: maxSize)
             {
                 maybeData, maybeContext, isComplete, maybeError in
@@ -140,13 +136,11 @@ public class TransportToTransmissionConnection: Transmission.Connection
             }
 
             buffer.append(bytes)
-
             let targetSize = min(maxSize, buffer.count)
-
             let result = Data(buffer[0..<targetSize])
             buffer = Data(buffer[targetSize..<buffer.count])
-
             readLock.leave()
+            
             return result
         }
     }
@@ -237,24 +231,17 @@ public class TransportToTransmissionConnection: Transmission.Connection
 
     public func write(string: String) -> Bool
     {
-        print("TransportTransmission write called: \(#file), \(#line)")
-
         writeLock.enter()
-
         let data = string.data
-
         writeLock.leave()
+        
         return write(data: data)
     }
 
     public func write(data: Data) -> Bool
     {
-        print("TransportTransmission write called: \(#file), \(#line)")
-
         writeLock.enter()
-
         let success = networkWrite(data: data)
-
         writeLock.leave()
 
         return success
