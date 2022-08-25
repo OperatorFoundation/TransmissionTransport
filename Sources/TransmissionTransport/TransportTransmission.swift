@@ -10,14 +10,17 @@ import SwiftHexTools
 public class TransportToTransmissionConnection: Transmission.Connection
 {
     let id: Int
-    var connection: Transport.Connection
-    var connectLock = DispatchGroup()
-    var readLock = DispatchGroup()
-    var writeLock = DispatchGroup()
     let log: Logger?
     let states: BlockingQueue<Bool> = BlockingQueue<Bool>()
+    let connectLock = DispatchGroup()
+    let readLock = DispatchGroup()
+    let writeLock = DispatchGroup()
+    
     var buffer: Data = Data()
+    var connection: Transport.Connection
+    var connectionClosed = false
 
+    
     public convenience init?(logger: Logger? = nil, _ connectionFactory: @escaping () -> Transport.Connection?)
     {
         guard let connection = connectionFactory() else
@@ -285,11 +288,6 @@ public class TransportToTransmissionConnection: Transmission.Connection
         return success
     }
 
-    public func close()
-    {
-        self.connection.cancel()
-    }
-
     func handleState(state: NWConnection.State)
     {
         connectLock.wait()
@@ -318,10 +316,24 @@ public class TransportToTransmissionConnection: Transmission.Connection
 
     func failConnect()
     {
-        maybeLog(message: "Failed to make a Transmission connection", logger: self.log)
-
-        connection.stateUpdateHandler = nil
-        connection.cancel()
+        self.log?.debug("TransmissionTransport: received a cancelled state update. Closing the connection.")
+        self.close()
+    }
+    
+    public func close()
+    {
+        if !connectionClosed
+        {
+            self.log?.debug("TransmissionTransport: Closing the connection.")
+            connectionClosed = true
+            self.connection.cancel()
+            self.connection.stateUpdateHandler = nil
+        }
+        else
+        {
+            self.log?.debug("TransmissionTransport: ignoring a close connection request, the connection is already closed.")
+        }
+        
     }
 
     func networkRead(size: Int) -> Data?
