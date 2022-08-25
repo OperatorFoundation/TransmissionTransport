@@ -299,7 +299,7 @@ public class TransportToTransmissionConnection: Transmission.Connection
                 return
             case .cancelled:
                 self.states.enqueue(element: false)
-                self.failConnect()
+                self.close()
                 return
             case .failed(_):
                 self.states.enqueue(element: false)
@@ -307,7 +307,7 @@ public class TransportToTransmissionConnection: Transmission.Connection
                 return
             case .waiting(_):
                 self.states.enqueue(element: false)
-                self.failConnect()
+                self.close()
                 return
             default:
                 return
@@ -316,7 +316,7 @@ public class TransportToTransmissionConnection: Transmission.Connection
 
     func failConnect()
     {
-        self.log?.debug("TransmissionTransport: received a cancelled state update. Closing the connection.")
+        self.log?.debug("TransmissionTransport: TransportTransmission - received a cancelled state update. Closing the connection.")
         self.close()
     }
     
@@ -324,14 +324,14 @@ public class TransportToTransmissionConnection: Transmission.Connection
     {
         if !connectionClosed
         {
-            self.log?.debug("TransmissionTransport: Closing the connection.")
+            self.log?.debug("TransmissionTransport: TransportTransmission.close - Closing the connection.")
             connectionClosed = true
             self.connection.cancel()
             self.connection.stateUpdateHandler = nil
         }
         else
         {
-            self.log?.debug("TransmissionTransport: ignoring a close connection request, the connection is already closed.")
+            self.log?.debug("TransmissionTransport: TransportTransmission.close - ignoring a close connection request, the connection is already closed.")
         }
         
     }
