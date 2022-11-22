@@ -86,6 +86,43 @@ public class TransportToTransmissionConnection: Transmission.Connection
         return result
     }
 
+    public func unsafeRead(size: Int) -> Data?
+    {
+        if size == 0
+        {
+            log?.error("TransportTransmission read size was zero")
+
+            return nil
+        }
+
+        if size <= buffer.count
+        {
+            let result = Data(buffer[0..<size])
+            buffer = Data(buffer[size..<buffer.count])
+
+            return result
+        }
+
+        guard let data = networkRead(size: size) else
+        {
+            log?.error("transmission read's network read failed")
+            return nil
+        }
+
+        buffer.append(data)
+
+        guard size <= buffer.count else
+        {
+            log?.error("TransportTransmission read asked for more bytes than available in the buffer")
+            return nil
+        }
+
+        let result = Data(buffer[0..<size])
+        buffer = Data(buffer[size..<buffer.count])
+
+        return result
+    }
+
     public func read(maxSize: Int) -> Data?
     {
         readLock.enter()
