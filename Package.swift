@@ -20,6 +20,7 @@ let package = Package(
         // .package(url: /* package url */, from: "1.0.0"),
         .package(url: "https://github.com/OperatorFoundation/Chord.git", branch: "main"),
         .package(url: "https://github.com/OperatorFoundation/Datable.git", branch: "main"),
+        .package(url: "https://github.com/OperatorFoundation/Straw.git", branch: "main"),
         .package(url: "https://github.com/OperatorFoundation/Transport.git", branch: "main"),
         .package(url: "https://github.com/OperatorFoundation/Transmission.git", branch: "main"),
         .package(url: "https://github.com/OperatorFoundation/SwiftHexTools.git", branch: "main"),
@@ -35,6 +36,7 @@ let package = Package(
 		[
 			"Chord",
 			"Datable",
+            "Straw",
 			"Transport",
             "Net",
 			"Transmission",

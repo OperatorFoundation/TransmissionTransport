@@ -1,25 +1,26 @@
 import Foundation
-import Transport
+import Logging
+
 import Chord
 import Datable
-import Transmission
 import Net
-import Logging
+import Straw
 import SwiftHexTools
+import Transmission
+import Transport
 
 public class TransportToTransmissionConnection: Transmission.Connection
 {
     let id: Int
     let log: Logger?
     let states: BlockingQueue<Bool> = BlockingQueue<Bool>()
-    let connectLock = DispatchGroup()
-    let readLock = DispatchGroup()
-    let writeLock = DispatchGroup()
+    let connectLock = DispatchSemaphore(value: 1)
+    let readLock = DispatchSemaphore(value: 1)
+    let writeLock = DispatchSemaphore(value: 1)
+    let straw = Straw()
     
-    var buffer: Data = Data()
     var connection: Transport.Connection
     var connectionClosed = false
-
     
     public convenience init?(logger: Logger? = nil, _ connectionFactory: @escaping () -> Transport.Connection?)
     {
@@ -44,45 +45,37 @@ public class TransportToTransmissionConnection: Transmission.Connection
 
     public func read(size: Int) -> Data?
     {
-        readLock.enter()
+        readLock.wait()
 
         if size == 0
         {
             log?.error("TransportTransmission read size was zero")
-            readLock.leave()
-            
+
+            readLock.signal()
             return nil
         }
 
-        if size <= buffer.count
+        if size <= self.straw.count
         {
-            let result = Data(buffer[0..<size])
-            buffer = Data(buffer[size..<buffer.count])
-            readLock.leave()
-            
+            let result = try? self.straw.read(size: size)
+
+            readLock.signal()
             return result
         }
 
-        guard let data = networkRead(size: size) else
+        guard let data = networkRead(size: size - self.straw.count) else
         {
             log?.error("transmission read's network read failed")
-            readLock.leave()
+
+            readLock.signal()
             return nil
         }
 
-        buffer.append(data)
+        straw.write(data)
 
-        guard size <= buffer.count else
-        {
-            log?.error("TransportTransmission read asked for more bytes than available in the buffer")
-            readLock.leave()
-            return nil
-        }
+        let result = try? self.straw.read(size: size)
 
-        let result = Data(buffer[0..<size])
-        buffer = Data(buffer[size..<buffer.count])
-        readLock.leave()
-        
+        readLock.signal()
         return result
     }
 
@@ -95,234 +88,83 @@ public class TransportToTransmissionConnection: Transmission.Connection
             return nil
         }
 
-        if size <= buffer.count
+        if size <= self.straw.count
         {
-            let result = Data(buffer[0..<size])
-            buffer = Data(buffer[size..<buffer.count])
+            let result = try? self.straw.read(size: size)
 
             return result
         }
 
-        guard let data = networkRead(size: size) else
+        guard let data = networkRead(size: size - self.straw.count) else
         {
             log?.error("transmission read's network read failed")
+
             return nil
         }
 
-        buffer.append(data)
+        straw.write(data)
 
-        guard size <= buffer.count else
-        {
-            log?.error("TransportTransmission read asked for more bytes than available in the buffer")
-            return nil
-        }
-
-        let result = Data(buffer[0..<size])
-        buffer = Data(buffer[size..<buffer.count])
+        let result = try? self.straw.read(size: size)
 
         return result
     }
 
     public func read(maxSize: Int) -> Data?
     {
-        readLock.enter()
+        readLock.wait()
 
         if maxSize == 0
         {
-            readLock.leave()
+            log?.error("TransportTransmission read size was zero")
+
+            readLock.signal()
             return nil
         }
 
-        let size = maxSize <= buffer.count ? maxSize : buffer.count
-
-        if size > 0
+        if self.straw.isEmpty
         {
-            let result = Data(buffer[0..<size])
-            buffer = Data(buffer[size..<buffer.count])
-
-            readLock.leave()
-            return result
-        }
-        else
-        {
-            // Buffer is empty, so we need to do a network read
-            var data: Data?
-            let transportLock = DispatchGroup()
-            transportLock.enter()
-            
-            self.connection.receive(minimumIncompleteLength: 1, maximumLength: maxSize)
+            guard let data = networkRead(maxSize: maxSize) else
             {
-                maybeData, maybeContext, isComplete, maybeError in
+                log?.error("transmission read's network read failed")
 
-                guard let transportData = maybeData else
-                {
-                    data = nil
-                    return
-                }
-
-                guard maybeError == nil else
-                {
-                    data = nil
-                    return
-                }
-
-                data = transportData
-            }
-
-            guard let bytes = data else
-            {
-                readLock.leave()
+                readLock.signal()
                 return nil
             }
 
-            buffer.append(bytes)
-            let targetSize = min(maxSize, buffer.count)
-            let result = Data(buffer[0..<targetSize])
-            buffer = Data(buffer[targetSize..<buffer.count])
-            readLock.leave()
-            
-            return result
+            straw.write(data)
         }
+
+        let result = try? self.straw.read(maxSize: maxSize)
+
+        readLock.signal()
+        return result
     }
 
     public func readWithLengthPrefix(prefixSizeInBits: Int) -> Data?
     {
-        readLock.enter()
-
-        var maybeLength: Int? = nil
-
-        switch prefixSizeInBits
-        {
-            case 8:
-                guard let lengthData = networkRead(size: prefixSizeInBits/8) else
-                {
-                    readLock.leave()
-                    return nil
-                }
-
-                guard let boundedLength = UInt8(maybeNetworkData: lengthData) else
-                {
-                    readLock.leave()
-                    return nil
-                }
-
-                maybeLength = Int(boundedLength)
-            case 16:
-                guard let lengthData = networkRead(size: prefixSizeInBits/8) else
-                {
-                    readLock.leave()
-                    return nil
-                }
-
-                guard let boundedLength = UInt16(maybeNetworkData: lengthData) else
-                {
-                    readLock.leave()
-                    return nil
-                }
-
-                maybeLength = Int(boundedLength)
-            case 32:
-                guard let lengthData = networkRead(size: prefixSizeInBits/8) else
-                {
-                    readLock.leave()
-                    return nil
-                }
-
-                guard let boundedLength = UInt32(maybeNetworkData: lengthData) else
-                {
-                    readLock.leave()
-                    return nil
-                }
-
-                maybeLength = Int(boundedLength)
-            case 64:
-                guard let lengthData = networkRead(size: prefixSizeInBits/8) else
-                {
-                    readLock.leave()
-                    return nil
-                }
-
-                guard let boundedLength = UInt64(maybeNetworkData: lengthData) else
-                {
-                    readLock.leave()
-                    return nil
-                }
-
-                maybeLength = Int(boundedLength)
-            default:
-                readLock.leave()
-                return nil
-        }
-
-        guard let length = maybeLength else
-        {
-            readLock.leave()
-            return nil
-        }
-
-        guard let data = networkRead(size: length) else
-        {
-            readLock.leave()
-            return nil
-        }
-
-        return data
+        return TransmissionTypes.readWithLengthPrefix(prefixSizeInBits: prefixSizeInBits, connection: self)
     }
 
     public func write(string: String) -> Bool
     {
-        writeLock.enter()
         let data = string.data
-        writeLock.leave()
-        
+
         return write(data: data)
     }
 
     public func write(data: Data) -> Bool
     {
-        writeLock.enter()
-        let success = networkWrite(data: data)
-        writeLock.leave()
+        writeLock.wait()
 
+        let success = networkWrite(data: data)
+
+        writeLock.signal()
         return success
     }
 
     public func writeWithLengthPrefix(data: Data, prefixSizeInBits: Int) -> Bool
     {
-        writeLock.enter()
-
-        let length = data.count
-
-        var maybeLengthData: Data? = nil
-
-        switch prefixSizeInBits
-        {
-            case 8:
-                let boundedLength = UInt8(length)
-                maybeLengthData = boundedLength.maybeNetworkData
-            case 16:
-                let boundedLength = UInt16(length)
-                maybeLengthData = boundedLength.maybeNetworkData
-            case 32:
-                let boundedLength = UInt32(length)
-                maybeLengthData = boundedLength.maybeNetworkData
-            case 64:
-                let boundedLength = UInt64(length)
-                maybeLengthData = boundedLength.maybeNetworkData
-            default:
-                maybeLengthData = nil
-        }
-
-        guard let lengthData = maybeLengthData else
-        {
-            writeLock.leave()
-            return false
-        }
-
-        let atomicData = lengthData + data
-        let success = networkWrite(data: atomicData)
-        writeLock.leave()
-        return success
+        return TransmissionTypes.writeWithLengthPrefix(data: data, prefixSizeInBits: prefixSizeInBits, connection: self)
     }
 
     func handleState(state: NWConnection.State)
@@ -375,37 +217,73 @@ public class TransportToTransmissionConnection: Transmission.Connection
 
     func networkRead(size: Int) -> Data?
     {
-        var data: Data?
+        let transportLock = DispatchSemaphore(value: 0)
 
-        let transportLock = DispatchGroup()
-        transportLock.enter()
+        var maybeResult: Data? = nil
         self.connection.receive(minimumIncompleteLength: size, maximumLength: size)
         {
             maybeData, maybeContext, isComplete, maybeError in
 
             guard let transportData = maybeData else
             {
-                data = nil
+                transportLock.signal()
                 return
             }
 
             guard maybeError == nil else
             {
-                data = nil
+                transportLock.signal()
                 return
             }
 
-            data = transportData
+            maybeResult = transportData
+
+            transportLock.signal()
+            return
         }
 
-        return data
+        transportLock.wait()
+
+        return maybeResult
+    }
+
+    func networkRead(maxSize: Int) -> Data?
+    {
+        let transportLock = DispatchSemaphore(value: 0)
+
+        var maybeResult: Data? = nil
+        self.connection.receive(minimumIncompleteLength: 1, maximumLength: maxSize)
+        {
+            maybeData, maybeContext, isComplete, maybeError in
+
+            guard let transportData = maybeData else
+            {
+                transportLock.signal()
+                return
+            }
+
+            guard maybeError == nil else
+            {
+                transportLock.signal()
+                return
+            }
+
+            maybeResult = transportData
+
+            transportLock.signal()
+            return
+        }
+
+        transportLock.wait()
+
+        return maybeResult
     }
 
     func networkWrite(data: Data) -> Bool
     {
         var success = false
-        let lock = DispatchGroup()
-        lock.enter()
+        let lock = DispatchSemaphore(value: 0)
+
         self.connection.send(content: data, contentContext: .defaultMessage, isComplete: false, completion: NWConnection.SendCompletion.contentProcessed(
             {
                 error in
@@ -413,14 +291,15 @@ public class TransportToTransmissionConnection: Transmission.Connection
                 guard error == nil else
                 {
                     success = false
-                    lock.leave()
+                    lock.signal()
                     return
                 }
 
                 success = true
-                lock.leave()
+                lock.signal()
                 return
             }))
+
         lock.wait()
 
         return success
