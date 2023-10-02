@@ -18,13 +18,13 @@ let package = Package(
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
-        .package(url: "https://github.com/OperatorFoundation/Chord.git", branch: "main"),
-        .package(url: "https://github.com/OperatorFoundation/Datable.git", branch: "main"),
-        .package(url: "https://github.com/OperatorFoundation/Straw.git", branch: "main"),
-        .package(url: "https://github.com/OperatorFoundation/Transport.git", branch: "main"),
-        .package(url: "https://github.com/OperatorFoundation/Transmission.git", branch: "main"),
-        .package(url: "https://github.com/OperatorFoundation/SwiftHexTools.git", branch: "main"),
-        .package(url: "https://github.com/OperatorFoundation/Net.git", branch: "main"),
+        .package(url: "https://github.com/OperatorFoundation/Chord.git", branch: "release"),
+        .package(url: "https://github.com/OperatorFoundation/Datable.git", from: "4.0.0"),
+        .package(url: "https://github.com/OperatorFoundation/Straw.git", branch: "release"),
+        .package(url: "https://github.com/OperatorFoundation/Transport.git", branch: "release"),
+        .package(url: "https://github.com/OperatorFoundation/Transmission.git", branch: "release"),
+        .package(url: "https://github.com/OperatorFoundation/SwiftHexTools.git", branch: "1.2.6"),
+        .package(url: "https://github.com/OperatorFoundation/Net.git", branch: "release"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.5.3"),
     ],
     targets: [
