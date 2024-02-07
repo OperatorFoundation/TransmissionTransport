@@ -18,7 +18,7 @@ let package = Package(
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
-        .package(url: "https://github.com/OperatorFoundation/Chord", branch: "release"),
+        .package(url: "https://github.com/OperatorFoundation/Chord", branch: "0.1.1"),
         .package(url: "https://github.com/OperatorFoundation/Datable", from: "4.0.0"),
         .package(url: "https://github.com/OperatorFoundation/Straw", branch: "release"),
         .package(url: "https://github.com/OperatorFoundation/Transport", branch: "release"),
