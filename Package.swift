@@ -17,12 +17,12 @@ let package = Package(
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
-        .package(url: "https://github.com/OperatorFoundation/Chord", from: "0.1.4"),
+        .package(url: "https://github.com/OperatorFoundation/Chord", from: "0.1.5"),
         .package(url: "https://github.com/OperatorFoundation/Datable", from: "4.0.1"),
         .package(url: "https://github.com/OperatorFoundation/Net", from: "0.0.10"),
-        .package(url: "https://github.com/OperatorFoundation/Straw", from: "1.0.1"),
+        .package(url: "https://github.com/OperatorFoundation/Straw", from: "1.0.4"),
         .package(url: "https://github.com/OperatorFoundation/Transport", from: "2.3.13"),
-        .package(url: "https://github.com/OperatorFoundation/Transmission", from: "1.2.11"),
+        .package(url: "https://github.com/OperatorFoundation/Transmission", from: "1.2.12"),
         .package(url: "https://github.com/OperatorFoundation/SwiftHexTools", from: "1.2.6"),
         .package(url: "https://github.com/apple/swift-log", from: "1.5.3"),
     ],
